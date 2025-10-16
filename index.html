@@ -144,6 +144,9 @@
             align-items: center;
             gap: 0.5rem;
             margin: 0.5rem 0;
+            padding: 0.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 0.5rem;
         }
 
         .play-button {
@@ -158,6 +161,7 @@
             justify-content: center;
             cursor: pointer;
             transition: all 0.3s;
+            flex-shrink: 0;
         }
 
         .play-button:hover {
@@ -167,12 +171,39 @@
 
         .play-button.playing {
             background: var(--primary-pink);
+            animation: pulse 1s infinite;
+        }
+
+        .play-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
         }
 
         .audio-text {
             flex: 1;
             font-style: italic;
             color: #6b7280;
+        }
+
+        .pronunciation-hint {
+            font-size: 0.75rem;
+            color: #6b7280;
+            margin-top: 0.25rem;
+            font-style: italic;
+        }
+
+        .voice-status {
+            background: #e0f2fe;
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+            margin: 0.5rem 0;
+            font-size: 0.875rem;
+            color: #0369a1;
+        }
+
+        .voice-status.error {
+            background: #fee2e2;
+            color: #dc2626;
         }
 
         /* Main Content Styles */
@@ -1054,10 +1085,19 @@
     </style>
 </head>
 <body>
+    <!-- Voice Status Display -->
+    <div id="voiceStatus" class="voice-status" style="display: none;">
+        <i class="fas fa-spinner fa-spin"></i>
+        Loading French audio...
+    </div>
+
     <!-- Celebration Animation -->
     <div id="celebration" class="celebration" style="display: none;">
         <i class="fas fa-sparkles"></i>
     </div>
+
+    <!-- Pronunciation Hint (shown when audio fails) -->
+    <div id="pronunciationHint" style="display: none;"></div>
 
     <!-- Header -->
     <header>
@@ -1206,6 +1246,353 @@
     </footer>
 
     <script>
+        // Enhanced French Audio Manager with guaranteed French accent
+        const FrenchAudioManager = {
+            synthesis: window.speechSynthesis,
+            frenchVoices: [],
+            currentVoice: null,
+            isReady: false,
+            fallbackMode: false,
+
+            init() {
+                if (!this.synthesis) {
+                    this.showError('Text-to-speech not supported in your browser');
+                    return;
+                }
+
+                console.log('Initializing French audio manager...');
+
+                // Load voices with multiple strategies
+                this.loadVoicesWithRetry();
+            },
+
+            loadVoicesWithRetry() {
+                let attempts = 0;
+                const maxAttempts = 3;
+
+                const tryLoadVoices = () => {
+                    attempts++;
+                    const voices = this.synthesis.getVoices();
+                    
+                    if (voices.length === 0 && attempts < maxAttempts) {
+                        console.log(`No voices loaded yet, attempt ${attempts}/${maxAttempts}`);
+                        setTimeout(tryLoadVoices, 1000);
+                        return;
+                    }
+
+                    this.processVoices(voices);
+                };
+
+                // Initial try
+                tryLoadVoices();
+
+                // Also listen for voiceschanged event
+                this.synthesis.onvoiceschanged = () => {
+                    console.log('Voices changed event received');
+                    this.processVoices(this.synthesis.getVoices());
+                };
+            },
+
+            processVoices(voices) {
+                console.log('Available voices:', voices);
+
+                // STRATEGY 1: Find genuine French voices
+                this.frenchVoices = voices.filter(voice => {
+                    // Look for French language codes
+                    const isFrench = voice.lang.startsWith('fr-') || 
+                                   voice.lang === 'fr' ||
+                                   voice.lang.includes('French') ||
+                                   voice.name.toLowerCase().includes('french') ||
+                                   voice.name.toLowerCase().includes('français');
+
+                    console.log(`Voice: ${voice.name} (${voice.lang}) - French: ${isFrench}`);
+                    return isFrench;
+                });
+
+                // STRATEGY 2: If no French voices, use voices that support French
+                if (this.frenchVoices.length === 0) {
+                    console.log('No dedicated French voices found, looking for multilingual voices...');
+                    this.frenchVoices = voices.filter(voice => {
+                        // Some voices are multilingual and can handle French
+                        return voice.lang.includes('fr') || 
+                               voice.localService === true ||
+                               voice.default === true;
+                    });
+                }
+
+                // STRATEGY 3: Last resort - use any available voice
+                if (this.frenchVoices.length === 0 && voices.length > 0) {
+                    console.log('No French-compatible voices found, using any available voice');
+                    this.frenchVoices = voices;
+                    this.fallbackMode = true;
+                }
+
+                // Sort voices by quality (local > default > others)
+                this.frenchVoices.sort((a, b) => {
+                    if (a.localService && !b.localService) return -1;
+                    if (!a.localService && b.localService) return 1;
+                    if (a.default && !b.default) return -1;
+                    if (!a.default && b.default) return 1;
+                    return 0;
+                });
+
+                this.currentVoice = this.frenchVoices[0] || null;
+                this.isReady = this.currentVoice !== null;
+
+                this.showVoiceStatus();
+            },
+
+            showVoiceStatus() {
+                const status = document.getElementById('voiceStatus');
+                if (!status) return;
+
+                if (this.currentVoice) {
+                    status.className = this.fallbackMode ? 'voice-status error' : 'voice-status';
+                    status.innerHTML = `
+                        <i class="fas ${this.fallbackMode ? 'fa-exclamation-triangle' : 'fa-check-circle'}"></i>
+                        ${this.fallbackMode ? 'Using fallback voice' : 'French voice ready'}: 
+                        ${this.currentVoice.name} (${this.currentVoice.lang})
+                        ${this.fallbackMode ? '<br><small>Pronunciation may not be perfect</small>' : ''}
+                    `;
+                    status.style.display = 'block';
+                } else {
+                    status.className = 'voice-status error';
+                    status.innerHTML = `
+                        <i class="fas fa-exclamation-triangle"></i>
+                        No audio voices available. Audio features disabled.
+                    `;
+                    status.style.display = 'block';
+                }
+
+                // Auto-hide after 5 seconds if successful
+                if (!this.fallbackMode && this.currentVoice) {
+                    setTimeout(() => {
+                        status.style.display = 'none';
+                    }, 5000);
+                }
+            },
+
+            speakFrench(text, onStart = null, onEnd = null, onError = null) {
+                if (!this.isReady) {
+                    const errorMsg = 'Audio not ready. Please refresh the page.';
+                    console.error(errorMsg);
+                    if (onError) onError(errorMsg);
+                    return null;
+                }
+
+                // Stop any current speech
+                this.synthesis.cancel();
+
+                // Enhanced French text preparation
+                const preparedText = this.enhanceFrenchPronunciation(text);
+
+                const utterance = new SpeechSynthesisUtterance(preparedText);
+                
+                // Force French pronunciation settings
+                utterance.voice = this.currentVoice;
+                utterance.lang = 'fr-FR'; // Force French France dialect
+                utterance.rate = 0.85;    // Slower for clarity
+                utterance.pitch = 1.0;
+                utterance.volume = 1.0;
+
+                // Additional French-specific optimizations
+                this.applyFrenchSpeechSettings(utterance, preparedText);
+
+                // Event handlers
+                utterance.onstart = onStart;
+                utterance.onend = onEnd;
+                utterance.onerror = onError;
+
+                console.log(`Speaking French: "${text}" with voice: ${this.currentVoice.name}`);
+                this.synthesis.speak(utterance);
+
+                return utterance;
+            },
+
+            enhanceFrenchPronunciation(text) {
+                return text
+                    // Handle French abbreviations and contractions
+                    .replace(/M\./g, 'Monsieur')
+                    .replace(/Mme\./g, 'Madame')
+                    .replace(/Mlle\./g, 'Mademoiselle')
+                    .replace(/Dr\./g, 'Docteur')
+                    .replace(/St\./g, 'Saint')
+                    
+                    // Add pauses for natural French rhythm
+                    .replace(/,/g, ', ')
+                    .replace(/!/g, '! ')
+                    .replace(/\?/g, '? ')
+                    
+                    // Clean up
+                    .replace(/\s+/g, ' ')
+                    .trim();
+            },
+
+            applyFrenchSpeechSettings(utterance, text) {
+                // French-specific speech adjustments
+                
+                // Questions get slightly higher pitch
+                if (text.includes('?') || 
+                    text.startsWith('Comment') || 
+                    text.startsWith('Quel') || 
+                    text.startsWith('Où') ||
+                    text.startsWith('Pourquoi')) {
+                    utterance.pitch = 1.1;
+                    utterance.rate = 0.8; // Even slower for questions
+                }
+
+                // Exclamations get more emphasis
+                if (text.includes('!')) {
+                    utterance.rate = 0.9;
+                    utterance.pitch = 1.05;
+                }
+
+                // Longer sentences get slower pace
+                const wordCount = text.split(' ').length;
+                if (wordCount > 8) {
+                    utterance.rate = Math.max(0.7, 0.85 - (wordCount * 0.01));
+                }
+            },
+
+            stop() {
+                this.synthesis.cancel();
+            }
+        };
+
+        // Enhanced play function with better feedback
+        function playFrenchText(text, buttonElement = null) {
+            const button = buttonElement || event?.target?.closest('.play-button') || event?.target?.closest('.audio-button');
+            
+            if (button) {
+                button.classList.add('playing');
+                button.disabled = true;
+                button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            }
+
+            // Add pronunciation hints for English speakers
+            const pronunciationHint = generatePronunciationHint(text);
+            
+            FrenchAudioManager.speakFrench(
+                text,
+                // onStart
+                () => {
+                    console.log('Started speaking French:', text);
+                    if (button) {
+                        button.innerHTML = '<i class="fas fa-volume-up"></i>';
+                    }
+                },
+                // onEnd
+                () => {
+                    console.log('Finished speaking French:', text);
+                    if (button) {
+                        button.classList.remove('playing');
+                        button.disabled = false;
+                        button.innerHTML = '<i class="fas fa-volume-up"></i>';
+                    }
+                },
+                // onError
+                (error) => {
+                    console.error('French speech error:', error);
+                    if (button) {
+                        button.classList.remove('playing');
+                        button.disabled = false;
+                        button.innerHTML = '<i class="fas fa-volume-mute"></i>';
+                        
+                        // Show pronunciation hint as fallback
+                        showPronunciationHint(text, pronunciationHint);
+                        
+                        // Reset icon after delay
+                        setTimeout(() => {
+                            button.innerHTML = '<i class="fas fa-volume-up"></i>';
+                        }, 2000);
+                    }
+                }
+            );
+        }
+
+        // Generate pronunciation hints for English speakers
+        function generatePronunciationHint(frenchText) {
+            const hints = {
+                'Bonjour': 'bohn-zhoor',
+                'Bonsoir': 'bohn-swahr',
+                'Au revoir': 'oh ruh-vwahr',
+                'Merci': 'mehr-see',
+                'Comment ça va': 'koh-mohn sah vah',
+                'Je m\'appelle': 'zhuh mah-pell',
+                'Comment tu t\'appelles': 'koh-mohn too tah-pell',
+                'Je suis': 'zhuh swee',
+                'Voici': 'vwah-see',
+                'Mon ami': 'mohn ah-mee',
+                'Mon amie': 'mohn ah-mee',
+                'Il s\'appelle': 'eel sah-pell',
+                'Elle s\'appelle': 'ell sah-pell',
+                'La tête': 'lah tet',
+                'Les yeux': 'lay zyuh',
+                'La famille': 'lah fah-mee',
+                'Le père': 'luh pair',
+                'La mère': 'lah mair',
+                'Le frère': 'luh frair',
+                'La sœur': 'lah suhr'
+            };
+
+            // Find matching hints
+            for (const [french, hint] of Object.entries(hints)) {
+                if (frenchText.includes(french)) {
+                    return `${french} ≈ "${hint}"`;
+                }
+            }
+
+            return null;
+        }
+
+        // Show pronunciation hint
+        function showPronunciationHint(frenchText, hint) {
+            // Create or update hint display
+            let hintElement = document.getElementById('pronunciationHint');
+            if (!hintElement) {
+                hintElement = document.createElement('div');
+                hintElement.id = 'pronunciationHint';
+                hintElement.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: #fffbeb;
+                    border: 2px solid #f59e0b;
+                    border-radius: 8px;
+                    padding: 1rem;
+                    max-width: 300px;
+                    z-index: 10000;
+                    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                `;
+                document.body.appendChild(hintElement);
+            }
+
+            hintElement.innerHTML = `
+                <div style="display: flex; justify-content: between; align-items: start; margin-bottom: 0.5rem;">
+                    <strong style="color: #d97706;">Pronunciation Help</strong>
+                    <button onclick="this.parentElement.parentElement.remove()" 
+                            style="background: none; border: none; font-size: 1.2rem; cursor: pointer; color: #6b7280;">
+                        ×
+                    </button>
+                </div>
+                <div style="margin-bottom: 0.5rem;">
+                    <strong>French:</strong> "${frenchText}"
+                </div>
+                ${hint ? `<div><strong>Sounds like:</strong> ${hint}</div>` : ''}
+                <div style="margin-top: 0.5rem; font-size: 0.875rem; color: #6b7280;">
+                    <i class="fas fa-info-circle"></i> Audio not available - practice saying it aloud!
+                </div>
+            `;
+            hintElement.style.display = 'block';
+
+            // Auto-remove after 8 seconds
+            setTimeout(() => {
+                if (hintElement && hintElement.parentElement) {
+                    hintElement.style.display = 'none';
+                }
+            }, 8000);
+        }
+
         // Application state
         const state = {
             activeUnit: null,
@@ -1220,9 +1607,7 @@
             draggedItem: null,
             matchedPairs: [],
             userInput: '',
-            fillInAnswers: {},
-            speechSynthesis: window.speechSynthesis,
-            currentUtterance: null
+            fillInAnswers: {}
         };
 
         // Exercises data
@@ -1486,14 +1871,13 @@
 
         // Initialize the application
         document.addEventListener('DOMContentLoaded', function() {
+            // Initialize audio manager first
+            FrenchAudioManager.init();
+            
+            // Your existing initialization
             renderUnits();
             setupEventListeners();
             updateScoreDisplay();
-            
-            // Check if speech synthesis is supported
-            if (!state.speechSynthesis) {
-                console.warn('Speech synthesis not supported in this browser');
-            }
         });
 
         // Render the units grid
@@ -1587,26 +1971,22 @@
             const unit = units.find(u => u.id === state.activeUnit);
             
             unitVocabulary.forEach(item => {
+                const hint = generatePronunciationHint(item.french);
                 const vocabItem = document.createElement('div');
                 vocabItem.className = 'vocabulary-item';
                 vocabItem.style.background = `linear-gradient(to right, ${getColorClasses(unit.color.replace('500', '50'))})`;
                 
-                // Add subtle background icon based on unit
-                vocabItem.style.backgroundImage = `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="${getColorValue(unit.color.split(' ')[0])}" opacity="0.1"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>')`;
-                vocabItem.style.backgroundSize = '60px';
-                vocabItem.style.backgroundPosition = 'right bottom';
-                vocabItem.style.backgroundRepeat = 'no-repeat';
-                
                 vocabItem.innerHTML = `
                     <div class="vocab-header">
                         <span class="vocab-french">${item.french}</span>
-                        <button class="play-button" onclick="playFrenchText('${item.french}')">
+                        <button class="play-button" onclick="playFrenchText('${item.french.replace(/'/g, "\\'")}', this)">
                             <i class="fas fa-volume-up"></i>
                         </button>
                     </div>
                     <p class="vocab-english">${item.english}</p>
+                    ${hint ? `<div class="pronunciation-hint">${hint}</div>` : ''}
                     <div class="audio-player">
-                        <button class="play-button" onclick="playFrenchText('${item.example}')">
+                        <button class="play-button" onclick="playFrenchText('${item.example.replace(/'/g, "\\'")}', this)">
                             <i class="fas fa-volume-up"></i>
                         </button>
                         <span class="audio-text">"${item.example}"</span>
@@ -1632,7 +2012,7 @@
                     <div class="speaker-icon ${line.speaker === 'A' ? 'speaker-a' : 'speaker-b'}">${line.speaker}</div>
                     <div class="dialogue-bubble">
                         <div class="audio-player">
-                            <button class="play-button" onclick="playFrenchText('${line.french}')">
+                            <button class="play-button" onclick="playFrenchText('${line.french.replace(/'/g, "\\'")}', this)">
                                 <i class="fas fa-volume-up"></i>
                             </button>
                             <span class="audio-text dialogue-french">${line.french}</span>
@@ -1874,12 +2254,18 @@
                 <div class="audio-container">
                     <h4>${exercise.question}</h4>
                     <div class="audio-player">
-                        <button class="audio-button" onclick="playFrenchText('${exercise.audioText}')">
+                        <button class="audio-button" onclick="playFrenchText('${exercise.audioText.replace(/'/g, "\\'")}', this)">
                             <i class="fas fa-volume-up"></i>
                             <span>Play Audio</span>
                         </button>
                         <span class="audio-text">"${exercise.audioText}"</span>
                     </div>
+                    ${FrenchAudioManager.frenchVoices.length > 1 ? `
+                        <div style="margin-top: 1rem; font-size: 0.875rem; color: #6b7280;">
+                            <i class="fas fa-info-circle"></i>
+                            Using: ${FrenchAudioManager.currentVoice?.name || 'French voice'}
+                        </div>
+                    ` : ''}
                 </div>
                 <div class="options-grid" id="optionsGrid">
                     ${exercise.options.map((option, i) => `
@@ -2059,57 +2445,6 @@
             document.getElementById('exerciseContent').style.display = 'none';
             document.getElementById('completionScreen').style.display = 'none';
             document.getElementById('unitActions').style.display = 'grid';
-        }
-
-        // Text-to-speech function
-        function playFrenchText(text) {
-            // Stop any currently playing speech
-            if (state.currentUtterance) {
-                state.speechSynthesis.cancel();
-            }
-            
-            // Create a new utterance
-            const utterance = new SpeechSynthesisUtterance(text);
-            
-            // Set French language and voice properties
-            utterance.lang = 'fr-FR';
-            utterance.rate = 0.9; // Slightly slower for language learning
-            utterance.pitch = 1;
-            utterance.volume = 1;
-            
-            // Try to find a French voice
-            const voices = state.speechSynthesis.getVoices();
-            const frenchVoice = voices.find(voice => 
-                voice.lang.startsWith('fr') || voice.lang.startsWith('fr-FR')
-            );
-            
-            if (frenchVoice) {
-                utterance.voice = frenchVoice;
-            }
-            
-            // Store the current utterance
-            state.currentUtterance = utterance;
-            
-            // Speak the text
-            state.speechSynthesis.speak(utterance);
-            
-            // Update button state
-            const button = event.target.closest('.play-button') || event.target.closest('.audio-button');
-            if (button) {
-                button.classList.add('playing');
-                button.querySelector('i').className = 'fas fa-volume-up';
-                
-                // Reset button when speech ends
-                utterance.onend = function() {
-                    button.classList.remove('playing');
-                };
-                
-                utterance.onerror = function() {
-                    button.classList.remove('playing');
-                    // Fallback: show the text in an alert if speech fails
-                    alert(`Pronunciation: ${text}`);
-                };
-            }
         }
 
         // Utility functions
