@@ -1,0 +1,2060 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>French Adventure! 🇫🇷 - Interactive Learning</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-purple: #8b5cf6;
+            --primary-pink: #ec4899;
+            --blue-500: #3b82f6;
+            --cyan-500: #06b6d4;
+            --purple-500: #a855f7;
+            --pink-500: #ec4899;
+            --green-500: #10b981;
+            --emerald-500: #059669;
+            --orange-500: #f97316;
+            --red-500: #ef4444;
+            --yellow-500: #eab308;
+            --amber-500: #f59e0b;
+            --indigo-50: #eef2ff;
+            --purple-50: #faf5ff;
+            --pink-50: #fdf2f8;
+            --blue-50: #eff6ff;
+            --cyan-50: #ecfeff;
+            --green-50: #f0fdf4;
+            --emerald-50: #ecfdf5;
+            --orange-50: #fff7ed;
+            --red-50: #fef2f2;
+            --yellow-50: #fefce8;
+            --amber-50: #fffbeb;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #e0e7ff, #f3e8ff, #fce7f3);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Header Styles */
+        header {
+            background-color: white;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 40;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo-icon {
+            background: linear-gradient(to right, var(--primary-purple), var(--primary-pink));
+            padding: 0.75rem;
+            border-radius: 0.75rem;
+        }
+
+        .logo-icon i {
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .logo-text h1 {
+            font-size: 1.5rem;
+            font-weight: bold;
+            background: linear-gradient(to right, var(--primary-purple), var(--primary-pink));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .logo-text p {
+            color: #6b7280;
+            font-size: 0.875rem;
+        }
+
+        .header-stats {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .streak-badge {
+            background-color: #fed7aa;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            animation: pulse 2s infinite;
+        }
+
+        .streak-badge i {
+            color: #ea580c;
+        }
+
+        .streak-badge span {
+            font-weight: bold;
+            color: #9a3412;
+        }
+
+        .score-badge {
+            background-color: #fef3c7;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .score-badge i {
+            color: #d97706;
+        }
+
+        .score-badge span {
+            font-weight: 600;
+            color: #92400e;
+        }
+
+        /* Main Content Styles */
+        main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+
+        .welcome-section {
+            text-align: center;
+            margin-bottom: 3rem;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .welcome-section h2 {
+            font-size: 2.25rem;
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 1rem;
+        }
+
+        .welcome-section p {
+            font-size: 1.25rem;
+            color: #6b7280;
+            max-width: 48rem;
+            margin: 0 auto;
+        }
+
+        /* Unit Grid */
+        .units-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .unit-card {
+            background-color: white;
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s;
+            transform: translateY(0);
+        }
+
+        .unit-card:hover {
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            transform: translateY(-0.5rem);
+        }
+
+        .unit-header {
+            padding: 1.5rem;
+            color: white;
+            position: relative;
+            min-height: 180px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            background-size: cover;
+            background-position: center;
+            background-blend-mode: overlay;
+        }
+
+        .unit-completed {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background-color: white;
+            border-radius: 9999px;
+            padding: 0.5rem;
+        }
+
+        .unit-completed i {
+            color: #eab308;
+            font-size: 1.25rem;
+        }
+
+        .unit-icon {
+            font-size: 3rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .unit-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .unit-subtitle {
+            opacity: 0.9;
+            font-size: 0.875rem;
+        }
+
+        .unit-footer {
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .unit-exercises {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #6b7280;
+        }
+
+        .unit-arrow {
+            color: #9ca3af;
+            transition: transform 0.3s;
+        }
+
+        .unit-card:hover .unit-arrow {
+            transform: translateX(0.25rem);
+        }
+
+        /* Unit Detail Styles */
+        .back-button {
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            color: var(--primary-purple);
+            font-weight: 600;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .back-button:hover {
+            color: #7c3aed;
+        }
+
+        .back-button i {
+            margin-right: 0.5rem;
+        }
+
+        .unit-detail-card {
+            background-color: white;
+            border-radius: 1rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+        }
+
+        .unit-detail-header {
+            margin: -2rem -2rem 2rem -2rem;
+            padding: 2rem;
+            color: white;
+            border-top-left-radius: 1rem;
+            border-top-right-radius: 1rem;
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            background-size: cover;
+            background-position: center;
+            background-blend-mode: overlay;
+        }
+
+        .unit-detail-content {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .unit-detail-icon {
+            font-size: 4rem;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            width: 100px;
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .unit-detail-text h2 {
+            font-size: 1.875rem;
+            font-weight: bold;
+        }
+
+        .unit-detail-text p {
+            opacity: 0.9;
+        }
+
+        .action-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .action-button {
+            padding: 2rem;
+            border-radius: 0.75rem;
+            color: white;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .action-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-size: cover;
+            background-position: center;
+            opacity: 0.2;
+            z-index: 0;
+        }
+
+        .action-button > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        .action-button:hover {
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            transform: scale(1.05);
+        }
+
+        .action-button i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            transition: transform 0.3s;
+        }
+
+        .action-button:hover i {
+            transform: scale(1.1);
+        }
+
+        .action-button h3 {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .action-button p {
+            opacity: 0.9;
+        }
+
+        /* Exercise Styles */
+        .exercise-card {
+            background-color: white;
+            border-radius: 1rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+        }
+
+        .progress-container {
+            margin-bottom: 2rem;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #6b7280;
+        }
+
+        .progress-percent {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--primary-purple);
+        }
+
+        .progress-bar {
+            width: 100%;
+            background-color: #e5e7eb;
+            border-radius: 9999px;
+            height: 0.75rem;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(to right, var(--primary-purple), var(--primary-pink));
+            transition: width 0.5s;
+        }
+
+        /* Exercise Types */
+        .exercise-question {
+            background: linear-gradient(to right, var(--blue-50), var(--cyan-50));
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .exercise-question::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100px;
+            height: 100px;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%233b82f6" opacity="0.1"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>');
+            background-repeat: no-repeat;
+            background-position: center;
+            opacity: 0.3;
+        }
+
+        .exercise-question h4 {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+
+        .exercise-points {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .exercise-points i {
+            color: #eab308;
+        }
+
+        .options-grid {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .option-button {
+            padding: 1rem;
+            border-radius: 0.75rem;
+            text-align: left;
+            font-weight: 600;
+            transition: all 0.3s;
+            border: 2px solid #e5e7eb;
+            background-color: white;
+            color: #1f2937;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+        }
+
+        .option-button:hover {
+            border-color: var(--primary-purple);
+            transform: scale(1.05);
+        }
+
+        .option-button.correct {
+            background-color: #10b981;
+            color: white;
+            border-color: #10b981;
+        }
+
+        .option-button.incorrect {
+            background-color: #ef4444;
+            color: white;
+            border-color: #ef4444;
+        }
+
+        .option-button.disabled {
+            background-color: #f3f4f6;
+            color: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        /* Matching Exercise */
+        .matching-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .matching-column h5 {
+            font-weight: bold;
+            color: #374151;
+            margin-bottom: 0.75rem;
+        }
+
+        .matching-item {
+            padding: 1rem;
+            border-radius: 0.5rem;
+            color: white;
+            cursor: move;
+            margin-bottom: 0.75rem;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .matching-item:hover {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .french-item {
+            background: linear-gradient(to right, var(--blue-500), #60a5fa);
+        }
+
+        .english-item {
+            background: linear-gradient(to right, var(--green-500), #34d399);
+        }
+
+        .matched-pairs {
+            background-color: #f0fdf4;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            margin-top: 1.5rem;
+        }
+
+        .matched-pairs h5 {
+            font-weight: bold;
+            color: #065f46;
+            margin-bottom: 0.75rem;
+        }
+
+        .pair-item {
+            display: flex;
+            justify-content: space-between;
+            background-color: white;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .pair-french {
+            color: var(--blue-500);
+            font-weight: 600;
+        }
+
+        .pair-english {
+            color: var(--green-500);
+            font-weight: 600;
+        }
+
+        /* Fill-in Exercise */
+        .fill-in-container {
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            border: 2px dashed #d1d5db;
+        }
+
+        .fill-in-line {
+            font-size: 1.125rem;
+            margin-bottom: 1rem;
+        }
+
+        .fill-in-input {
+            display: inline-block;
+            margin: 0 0.5rem;
+            padding: 0.25rem 0.75rem;
+            border-bottom: 2px solid var(--primary-purple);
+            min-width: 120px;
+            outline: none;
+        }
+
+        .fill-in-input:focus {
+            border-bottom-color: #7c3aed;
+        }
+
+        /* Typing Exercise */
+        .typing-container textarea {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #c4b5fd;
+            border-radius: 0.75rem;
+            font-size: 1.125rem;
+            outline: none;
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .typing-container textarea:focus {
+            border-color: var(--primary-purple);
+        }
+
+        /* Audio Exercise */
+        .audio-container {
+            background: linear-gradient(to right, var(--pink-50), #fecdd3);
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .audio-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100px;
+            height: 100px;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23ec4899" opacity="0.1"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>');
+            background-repeat: no-repeat;
+            background-position: center;
+            opacity: 0.3;
+        }
+
+        .audio-button {
+            background: linear-gradient(to right, var(--pink-500), #f43f5e);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 9999px;
+            font-weight: bold;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 0.75rem;
+        }
+
+        .audio-button:hover {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .audio-text {
+            margin-top: 0.75rem;
+            color: #6b7280;
+            font-style: italic;
+        }
+
+        /* Submit Button */
+        .submit-button {
+            width: 100%;
+            background: linear-gradient(to right, var(--primary-purple), var(--primary-pink));
+            color: white;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            font-weight: bold;
+            font-size: 1.125rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+            margin-top: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .submit-button:hover {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .submit-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Completion Screen */
+        .completion-screen {
+            text-align: center;
+            padding: 3rem 0;
+        }
+
+        .completion-icon {
+            background: linear-gradient(to right, var(--green-500), var(--emerald-500));
+            width: 6rem;
+            height: 6rem;
+            border-radius: 9999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+        }
+
+        .completion-icon i {
+            font-size: 3rem;
+            color: white;
+        }
+
+        .completion-screen h3 {
+            font-size: 1.875rem;
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 1rem;
+        }
+
+        .completion-screen p {
+            font-size: 1.25rem;
+            color: #6b7280;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Learning Content */
+        .vocabulary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .vocabulary-item {
+            padding: 1rem;
+            border-radius: 0.75rem;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .vocabulary-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 60px;
+            height: 60px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            opacity: 0.1;
+        }
+
+        .vocabulary-item:hover {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .vocab-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .vocab-french {
+            font-size: 1.125rem;
+            font-weight: bold;
+        }
+
+        .vocab-audio {
+            color: #6b7280;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .vocab-audio:hover {
+            color: #4b5563;
+        }
+
+        .vocab-english {
+            color: #374151;
+            margin-bottom: 0.5rem;
+        }
+
+        .vocab-example {
+            font-size: 0.875rem;
+            color: #6b7280;
+            font-style: italic;
+        }
+
+        .dialogue-container {
+            background: linear-gradient(to right, var(--indigo-50), var(--purple-50));
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dialogue-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100px;
+            height: 100px;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%238b5cf6" opacity="0.1"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>');
+            background-repeat: no-repeat;
+            background-position: center;
+            opacity: 0.3;
+        }
+
+        .dialogue-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .dialogue-header i {
+            color: var(--primary-purple);
+        }
+
+        .dialogue-header h4 {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: var(--primary-purple);
+        }
+
+        .dialogue-line {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .speaker-icon {
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 9999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .speaker-a {
+            background-color: var(--blue-500);
+        }
+
+        .speaker-b {
+            background-color: var(--green-500);
+        }
+
+        .dialogue-bubble {
+            background-color: white;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            flex: 1;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+        }
+
+        .dialogue-french {
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .dialogue-english {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-top: 0.25rem;
+        }
+
+        /* Footer */
+        footer {
+            background-color: white;
+            margin-top: 4rem;
+            padding: 2rem 0;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+            text-align: center;
+        }
+
+        .footer-content p {
+            color: #6b7280;
+        }
+
+        .footer-content .tagline {
+            font-size: 0.875rem;
+            color: #9ca3af;
+            margin-top: 0.5rem;
+        }
+
+        /* Celebration Animation */
+        .celebration {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 50;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: bounce 1s infinite;
+        }
+
+        .celebration i {
+            font-size: 8rem;
+            color: #fbbf24;
+        }
+
+        /* Background Images */
+        .bg-eiffel {
+            background-image: linear-gradient(rgba(139, 92, 246, 0.8), rgba(236, 72, 153, 0.8)), url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" opacity="0.1"><path d="M21 10V4h-2v3.5l-4-1.9-4 1.9V4H7v6H5V4H3v6H1v2h2v8h2v-8h2v8h2v-8h2v6h2v-6h2v8h2v-8h2v8h2v-8h2v-2h-2zm-8-4.1l4 1.9V8h-4V5.9z"/></svg>');
+            background-size: cover, 200px;
+            background-position: center, center;
+        }
+
+        .bg-paris {
+            background-image: linear-gradient(rgba(59, 130, 246, 0.8), rgba(6, 182, 212, 0.8)), url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" opacity="0.1"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>');
+            background-size: cover, 200px;
+            background-position: center, center;
+        }
+
+        .bg-friends {
+            background-image: linear-gradient(rgba(16, 185, 129, 0.8), rgba(5, 150, 105, 0.8)), url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" opacity="0.1"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>');
+            background-size: cover, 200px;
+            background-position: center, center;
+        }
+
+        .bg-people {
+            background-image: linear-gradient(rgba(249, 115, 22, 0.8), rgba(239, 68, 68, 0.8)), url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" opacity="0.1"><path d="M9 11.75c-.69 0-1.25.56-1.25 1.25s.56 1.25 1.25 1.25 1.25-.56 1.25-1.25-.56-1.25-1.25-1.25zm6 0c-.69 0-1.25.56-1.25 1.25s.56 1.25 1.25 1.25 1.25-.56 1.25-1.25-.56-1.25-1.25-1.25zM12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8 0-.29.02-.58.05-.86 2.36-1.05 4.23-2.98 5.21-5.37C11.07 8.33 14.05 10 17.42 10c.78 0 1.53-.09 2.25-.26.21.71.33 1.47.33 2.26 0 4.41-3.59 8-8 8z"/></svg>');
+            background-size: cover, 200px;
+            background-position: center, center;
+        }
+
+        .bg-family {
+            background-image: linear-gradient(rgba(234, 179, 8, 0.8), rgba(245, 158, 11, 0.8)), url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" opacity="0.1"><path d="M16 4c0-1.11.89-2 2-2s2 .89 2 2-.89 2-2 2-2-.89-2-2zm4 18v-6h2.5l-2.54-7.63C19.68 7.55 18.92 7 18.06 7h-.12c-.86 0-1.63.55-1.9 1.37l-.86 2.58c1.08.6 1.82 1.73 1.82 3.05v8h3zm-7.5-10.5c.83 0 1.5-.67 1.5-1.5s-.67-1.5-1.5-1.5S11 9.17 11 10s.67 1.5 1.5 1.5zM5.5 6c1.11 0 2-.89 2-2s-.89-2-2-2-2 .89-2 2 .89 2 2 2zm2 16v-7H9V9c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v6h1.5v7h4zm6.5 0v-4h1v-4c0-.82-.68-1.5-1.5-1.5h-2c-.82 0-1.5.68-1.5 1.5v4h1v4h3z"/></svg>');
+            background-size: cover, 200px;
+            background-position: center, center;
+        }
+
+        .bg-learn {
+            background-image: linear-gradient(rgba(59, 130, 246, 0.8), rgba(6, 182, 212, 0.8)), url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" opacity="0.2"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>');
+            background-size: cover, 150px;
+            background-position: center, right bottom;
+        }
+
+        .bg-practice {
+            background-image: linear-gradient(rgba(168, 85, 247, 0.8), rgba(236, 72, 153, 0.8)), url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" opacity="0.2"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>');
+            background-size: cover, 150px;
+            background-position: center, right bottom;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .units-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .matching-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .action-buttons {
+                grid-template-columns: 1fr;
+            }
+            
+            .vocabulary-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .unit-detail-content {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Celebration Animation -->
+    <div id="celebration" class="celebration" style="display: none;">
+        <i class="fas fa-sparkles"></i>
+    </div>
+
+    <!-- Header -->
+    <header>
+        <div class="header-content">
+            <div class="logo-container">
+                <div class="logo-icon">
+                    <i class="fas fa-book-open"></i>
+                </div>
+                <div class="logo-text">
+                    <h1>French Adventure! 🇫🇷</h1>
+                    <p>Interactive Learning</p>
+                </div>
+            </div>
+            <div class="header-stats">
+                <div id="streakBadge" class="streak-badge" style="display: none;">
+                    <i class="fas fa-bolt"></i>
+                    <span id="streakCount">0 Streak!</span>
+                </div>
+                <div class="score-badge">
+                    <i class="fas fa-trophy"></i>
+                    <span id="scoreValue">0 pts</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main id="mainContent">
+        <!-- Welcome Screen -->
+        <div id="welcomeScreen">
+            <div class="welcome-section">
+                <h2>Bienvenue! 🎉</h2>
+                <p>Choose a unit to start your interactive French adventure!</p>
+            </div>
+
+            <div class="units-grid" id="unitsGrid">
+                <!-- Units will be dynamically generated here -->
+            </div>
+        </div>
+
+        <!-- Unit Detail Screen -->
+        <div id="unitDetailScreen" style="display: none;">
+            <div class="back-button" id="backToUnits">
+                <i class="fas fa-arrow-left"></i>
+                <span>Back to Units</span>
+            </div>
+
+            <div class="unit-detail-card">
+                <div id="unitDetailHeader" class="unit-detail-header">
+                    <div class="unit-detail-content">
+                        <div id="unitDetailIcon" class="unit-detail-icon"></div>
+                        <div class="unit-detail-text">
+                            <h2 id="unitDetailTitle"></h2>
+                            <p id="unitDetailSubtitle"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="unitActions" class="action-buttons">
+                    <div class="action-button learn-button bg-learn">
+                        <i class="fas fa-book-open"></i>
+                        <h3>Learn</h3>
+                        <p>Vocabulary & Dialogues</p>
+                    </div>
+                    <div class="action-button practice-button bg-practice">
+                        <i class="fas fa-bullseye"></i>
+                        <h3>Practice</h3>
+                        <p id="exerciseCount">0 Interactive Exercises</p>
+                    </div>
+                </div>
+
+                <!-- Learning Content -->
+                <div id="learningContent" style="display: none;">
+                    <h3 class="section-title">📚 Learning Content</h3>
+                    
+                    <!-- Vocabulary Section -->
+                    <div class="vocabulary-section">
+                        <h4 class="subsection-title">
+                            <i class="fas fa-star"></i>
+                            <span>Key Vocabulary</span>
+                        </h4>
+                        <div id="vocabularyGrid" class="vocabulary-grid">
+                            <!-- Vocabulary items will be dynamically generated here -->
+                        </div>
+                    </div>
+                    
+                    <!-- Dialogue Section -->
+                    <div class="dialogue-container">
+                        <div class="dialogue-header">
+                            <i class="fas fa-comment-dots"></i>
+                            <h4>Sample Dialogue</h4>
+                        </div>
+                        <div id="dialogueContent">
+                            <!-- Dialogue content will be dynamically generated here -->
+                        </div>
+                    </div>
+                    
+                    <button id="startExercises" class="submit-button">
+                        <i class="fas fa-bullseye"></i>
+                        <span>Start Exercises</span>
+                    </button>
+                </div>
+
+                <!-- Exercise Content -->
+                <div id="exerciseContent" style="display: none;">
+                    <!-- Progress Bar -->
+                    <div class="progress-container">
+                        <div class="progress-header">
+                            <span class="progress-label" id="progressLabel">Question 1 of 5</span>
+                            <span class="progress-percent" id="progressPercent">20%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressFill" style="width: 20%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Exercise Container -->
+                    <div id="exerciseContainer">
+                        <!-- Exercise content will be dynamically generated here -->
+                    </div>
+                </div>
+
+                <!-- Completion Screen -->
+                <div id="completionScreen" style="display: none;">
+                    <div class="completion-screen">
+                        <div class="completion-icon">
+                            <i class="fas fa-trophy"></i>
+                        </div>
+                        <h3>Félicitations! 🎉</h3>
+                        <p>You've completed all exercises for this unit!</p>
+                        <button id="backToLessons" class="submit-button">
+                            Back to Lessons
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <p>🇫🇷 Interactive French Learning Platform</p>
+            <p class="tagline">Master French through fun, interactive exercises! 🎓</p>
+        </div>
+    </footer>
+
+    <script>
+        // Application state
+        const state = {
+            activeUnit: null,
+            activeSection: null,
+            score: 0,
+            currentExercise: 0,
+            selectedAnswer: null,
+            showFeedback: false,
+            completedExercises: [],
+            streak: 0,
+            celebrationMode: false,
+            draggedItem: null,
+            matchedPairs: [],
+            userInput: '',
+            fillInAnswers: {}
+        };
+
+        // Exercises data
+        const exercises = {
+            1: [
+                {
+                    id: 'quiz1',
+                    type: 'multiple-choice',
+                    question: 'How do you say "Good morning" in French?',
+                    options: ['Bonsoir', 'Bonjour', 'Au revoir', 'Salut'],
+                    correct: 'Bonjour',
+                    points: 10
+                },
+                {
+                    id: 'quiz2',
+                    type: 'multiple-choice',
+                    question: 'What does "Comment ça va?" mean?',
+                    options: ['Goodbye', 'Hello', 'How are you?', 'Thank you'],
+                    correct: 'How are you?',
+                    points: 10
+                },
+                {
+                    id: 'match1',
+                    type: 'matching',
+                    question: 'Match the French greetings with their English meanings:',
+                    pairs: [
+                        { french: 'Bonjour', english: 'Hello' },
+                        { french: 'Au revoir', english: 'Goodbye' },
+                        { french: 'Merci', english: 'Thank you' },
+                        { french: 'À demain', english: 'See you tomorrow' }
+                    ],
+                    points: 20
+                },
+                {
+                    id: 'fill1',
+                    type: 'fill-in',
+                    question: 'Complete the dialogue:',
+                    template: 'A: Bonjour! Comment ___?\\nB: Je vais ___, merci. Et ___?',
+                    blanks: ['ça va', 'bien', 'toi'],
+                    points: 15
+                },
+                {
+                    id: 'audio1',
+                    type: 'audio-quiz',
+                    question: 'Listen and choose the correct greeting:',
+                    audioText: 'Bonjour! Comment vas-tu?',
+                    options: ['Goodbye! How are you?', 'Hello! How are you?', 'Good night! How are you?', 'Hi! What\'s your name?'],
+                    correct: 'Hello! How are you?',
+                    points: 10
+                }
+            ],
+            2: [
+                {
+                    id: 'quiz3',
+                    type: 'multiple-choice',
+                    question: 'What does "Je m\'appelle" mean?',
+                    options: ['I am', 'My name is', 'I live', 'I like'],
+                    correct: 'My name is',
+                    points: 10
+                },
+                {
+                    id: 'match2',
+                    type: 'matching',
+                    question: 'Match the words with their meanings:',
+                    pairs: [
+                        { french: 'Nom', english: 'Surname' },
+                        { french: 'Prénom', english: 'First name' },
+                        { french: 'Nationalité', english: 'Nationality' },
+                        { french: 'Pays', english: 'Country' }
+                    ],
+                    points: 20
+                },
+                {
+                    id: 'fill2',
+                    type: 'fill-in',
+                    question: 'Complete the introduction:',
+                    template: 'Bonjour! Je ___ Marie. Je ___ française.',
+                    blanks: ['m\'appelle', 'suis'],
+                    points: 15
+                },
+                {
+                    id: 'type1',
+                    type: 'typing',
+                    question: 'How do you ask someone\'s name in French? (informal)',
+                    correct: ['Comment tu t\'appelles?', 'Tu t\'appelles comment?', 'Comment tu t\'appelles'],
+                    points: 15
+                }
+            ],
+            3: [
+                {
+                    id: 'quiz4',
+                    type: 'multiple-choice',
+                    question: 'What does "Voici mon ami" mean?',
+                    options: ['This is my friend', 'I am friend', 'My name is', 'He is here'],
+                    correct: 'This is my friend',
+                    points: 10
+                },
+                {
+                    id: 'match3',
+                    type: 'matching',
+                    question: 'Match the pronouns:',
+                    pairs: [
+                        { french: 'Il', english: 'He' },
+                        { french: 'Elle', english: 'She' },
+                        { french: 'Mon ami', english: 'My friend (male)' },
+                        { french: 'Mon amie', english: 'My friend (female)' }
+                    ],
+                    points: 20
+                },
+                {
+                    id: 'fill3',
+                    type: 'fill-in',
+                    question: 'Complete the introduction:',
+                    template: 'Voici mon ami! ___ s\'appelle Kofi. ___ est ghanéen.',
+                    blanks: ['Il', 'Il'],
+                    points: 15
+                }
+            ],
+            4: [
+                {
+                    id: 'quiz5',
+                    type: 'multiple-choice',
+                    question: 'What is the feminine form of "grand"?',
+                    options: ['Grande', 'Granda', 'Grands', 'Grand'],
+                    correct: 'Grande',
+                    points: 10
+                },
+                {
+                    id: 'match4',
+                    type: 'matching',
+                    question: 'Match the adjectives:',
+                    pairs: [
+                        { french: 'Grand', english: 'Tall/Big' },
+                        { french: 'Petit', english: 'Short/Small' },
+                        { french: 'Jeune', english: 'Young' },
+                        { french: 'Mince', english: 'Slim' }
+                    ],
+                    points: 20
+                },
+                {
+                    id: 'body1',
+                    type: 'multiple-choice',
+                    question: 'What is "head" in French?',
+                    options: ['La tête', 'Le pied', 'La main', 'L\'épaule'],
+                    correct: 'La tête',
+                    points: 10
+                }
+            ],
+            5: [
+                {
+                    id: 'quiz6',
+                    type: 'multiple-choice',
+                    question: 'What is "mother" in French?',
+                    options: ['Le père', 'La mère', 'La sœur', 'Le frère'],
+                    correct: 'La mère',
+                    points: 10
+                },
+                {
+                    id: 'match5',
+                    type: 'matching',
+                    question: 'Match the family members:',
+                    pairs: [
+                        { french: 'Le père', english: 'Father' },
+                        { french: 'La mère', english: 'Mother' },
+                        { french: 'Le frère', english: 'Brother' },
+                        { french: 'La sœur', english: 'Sister' }
+                    ],
+                    points: 20
+                },
+                {
+                    id: 'fill4',
+                    type: 'fill-in',
+                    question: 'Complete about your family:',
+                    template: 'Ma ___ s\'appelle Rebecca. Mon ___ s\'appelle Michael.',
+                    blanks: ['mère', 'père'],
+                    points: 15
+                }
+            ]
+        };
+
+        // Units data
+        const units = [
+            { id: 1, title: "Bonjour!", subtitle: "Saluer et prendre congé", icon: "👋", color: "from-blue-500 to-cyan-500", bgClass: "bg-eiffel" },
+            { id: 2, title: "Comment tu t'appelles?", subtitle: "Se présenter", icon: "👤", color: "from-purple-500 to-pink-500", bgClass: "bg-paris" },
+            { id: 3, title: "Voici mon ami(e)!", subtitle: "Présenter quelqu'un", icon: "👥", color: "from-green-500 to-emerald-500", bgClass: "bg-friends" },
+            { id: 4, title: "Il est grand. Elle est petite.", subtitle: "Décrire quelqu'un", icon: "🧑", color: "from-orange-500 to-red-500", bgClass: "bg-people" },
+            { id: 5, title: "Ma famille", subtitle: "Décrire la famille", icon: "👨‍👩‍👧‍👦", color: "from-yellow-500 to-amber-500", bgClass: "bg-family" }
+        ];
+
+        // Vocabulary data
+        const vocabulary = {
+            1: [
+                { french: 'Bonjour', english: 'Hello/Good morning', example: 'Bonjour! Comment ça va?' },
+                { french: 'Au revoir', english: 'Goodbye', example: 'Au revoir! À demain!' },
+                { french: 'Comment ça va?', english: 'How are you?', example: 'Salut! Comment ça va?' },
+                { french: 'Je vais bien', english: 'I am fine', example: 'Je vais bien, merci!' },
+                { french: 'Merci', english: 'Thank you', example: 'Merci beaucoup!' },
+                { french: 'À demain', english: 'See you tomorrow', example: 'À demain, mon ami!' }
+            ],
+            2: [
+                { french: 'Je m\'appelle', english: 'My name is', example: 'Je m\'appelle Marie.' },
+                { french: 'Comment tu t\'appelles?', english: 'What\'s your name?', example: 'Bonjour! Comment tu t\'appelles?' },
+                { french: 'Nom', english: 'Surname', example: 'Mon nom est Mensah.' },
+                { french: 'Prénom', english: 'First name', example: 'Mon prénom est Kofi.' },
+                { french: 'Je suis', english: 'I am', example: 'Je suis ghanéen.' },
+                { french: 'Nationalité', english: 'Nationality', example: 'Quelle est ta nationalité?' }
+            ],
+            3: [
+                { french: 'Voici', english: 'Here is/are', example: 'Voici mon ami!' },
+                { french: 'Il s\'appelle', english: 'His name is', example: 'Il s\'appelle Kofi.' },
+                { french: 'Elle s\'appelle', english: 'Her name is', example: 'Elle s\'appelle Ama.' },
+                { french: 'Mon ami', english: 'My friend (male)', example: 'Voici mon ami Kwame.' },
+                { french: 'Mon amie', english: 'My friend (female)', example: 'Voici mon amie Sarah.' },
+                { french: 'Qui est-ce?', english: 'Who is this?', example: 'Qui est-ce? C\'est Marie.' }
+            ],
+            4: [
+                { french: 'Grand(e)', english: 'Tall/Big', example: 'Il est grand.' },
+                { french: 'Petit(e)', english: 'Short/Small', example: 'Elle est petite.' },
+                { french: 'Mince', english: 'Slim', example: 'Il est mince.' },
+                { french: 'Jeune', english: 'Young', example: 'Elle est jeune.' },
+                { french: 'La tête', english: 'Head', example: 'J\'ai mal à la tête.' },
+                { french: 'Les yeux', english: 'Eyes', example: 'J\'ai les yeux bruns.' }
+            ],
+            5: [
+                { french: 'La famille', english: 'Family', example: 'Voici ma famille!' },
+                { french: 'Le père', english: 'Father', example: 'Mon père s\'appelle Michael.' },
+                { french: 'La mère', english: 'Mother', example: 'Ma mère s\'appelle Rebecca.' },
+                { french: 'Le frère', english: 'Brother', example: 'Mon frère est jeune.' },
+                { french: 'La sœur', english: 'Sister', example: 'Ma sœur s\'appelle Ama.' },
+                { french: 'Les grands-parents', english: 'Grandparents', example: 'J\'aime mes grands-parents.' }
+            ]
+        };
+
+        // Dialogue data
+        const dialogues = {
+            1: [
+                { speaker: 'A', french: 'Bonjour! Comment ça va?', english: 'Hello! How are you?' },
+                { speaker: 'B', french: 'Je vais bien, merci. Et toi?', english: 'I\'m fine, thank you. And you?' },
+                { speaker: 'A', french: 'Ça va bien! Au revoir!', english: 'I\'m doing well! Goodbye!' }
+            ],
+            2: [
+                { speaker: 'A', french: 'Bonjour! Comment tu t\'appelles?', english: 'Hello! What\'s your name?' },
+                { speaker: 'B', french: 'Je m\'appelle Marie. Et toi?', english: 'My name is Marie. And you?' },
+                { speaker: 'A', french: 'Je m\'appelle Kofi. Je suis ghanéen.', english: 'My name is Kofi. I am Ghanaian.' }
+            ],
+            3: [
+                { speaker: 'A', french: 'Voici mon ami!', english: 'Here is my friend!' },
+                { speaker: 'B', french: 'Bonjour! Comment il s\'appelle?', english: 'Hello! What\'s his name?' },
+                { speaker: 'A', french: 'Il s\'appelle Kwame. Il est ghanéen.', english: 'His name is Kwame. He is Ghanaian.' }
+            ],
+            4: [
+                { speaker: 'A', french: 'Comment est ton frère?', english: 'What is your brother like?' },
+                { speaker: 'B', french: 'Il est grand et jeune.', english: 'He is tall and young.' }
+            ],
+            5: [
+                { speaker: 'A', french: 'Voici ma famille!', english: 'Here is my family!' },
+                { speaker: 'B', french: 'Comment s\'appelle ta mère?', english: 'What is your mother\'s name?' },
+                { speaker: 'A', french: 'Ma mère s\'appelle Rebecca.', english: 'My mother\'s name is Rebecca.' }
+            ]
+        };
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            renderUnits();
+            setupEventListeners();
+            updateScoreDisplay();
+        });
+
+        // Render the units grid
+        function renderUnits() {
+            const unitsGrid = document.getElementById('unitsGrid');
+            unitsGrid.innerHTML = '';
+
+            units.forEach(unit => {
+                const unitCard = document.createElement('div');
+                unitCard.className = 'unit-card';
+                unitCard.innerHTML = `
+                    <div class="unit-header ${unit.bgClass}">
+                        ${state.completedExercises.includes(unit.id) ? 
+                            '<div class="unit-completed"><i class="fas fa-award"></i></div>' : ''}
+                        <div class="unit-icon">${unit.icon}</div>
+                        <h3 class="unit-title">${unit.title}</h3>
+                        <p class="unit-subtitle">${unit.subtitle}</p>
+                    </div>
+                    <div class="unit-footer">
+                        <span class="unit-exercises">${exercises[unit.id]?.length || 0} Exercises</span>
+                        <i class="fas fa-chevron-right unit-arrow"></i>
+                    </div>
+                `;
+                unitCard.addEventListener('click', () => selectUnit(unit.id));
+                unitsGrid.appendChild(unitCard);
+            });
+        }
+
+        // Set up event listeners
+        function setupEventListeners() {
+            // Back to units button
+            document.getElementById('backToUnits').addEventListener('click', backToUnits);
+            
+            // Learn and practice buttons
+            document.querySelector('.learn-button').addEventListener('click', showLearningContent);
+            document.querySelector('.practice-button').addEventListener('click', startExercises);
+            
+            // Start exercises button in learning content
+            document.getElementById('startExercises').addEventListener('click', startExercises);
+            
+            // Back to lessons button in completion screen
+            document.getElementById('backToLessons').addEventListener('click', backToLessons);
+        }
+
+        // Select a unit
+        function selectUnit(unitId) {
+            state.activeUnit = unitId;
+            state.activeSection = null;
+            state.currentExercise = 0;
+            
+            const unit = units.find(u => u.id === unitId);
+            
+            // Update unit detail screen
+            document.getElementById('unitDetailHeader').className = `unit-detail-header ${unit.bgClass}`;
+            document.getElementById('unitDetailIcon').textContent = unit.icon;
+            document.getElementById('unitDetailTitle').textContent = unit.title;
+            document.getElementById('unitDetailSubtitle').textContent = unit.subtitle;
+            document.getElementById('exerciseCount').textContent = `${exercises[unitId]?.length || 0} Interactive Exercises`;
+            
+            // Show unit detail screen, hide welcome screen
+            document.getElementById('welcomeScreen').style.display = 'none';
+            document.getElementById('unitDetailScreen').style.display = 'block';
+            
+            // Hide learning and exercise content
+            document.getElementById('learningContent').style.display = 'none';
+            document.getElementById('exerciseContent').style.display = 'none';
+            document.getElementById('completionScreen').style.display = 'none';
+        }
+
+        // Show learning content
+        function showLearningContent() {
+            state.activeSection = 'learn';
+            
+            // Hide action buttons, show learning content
+            document.getElementById('unitActions').style.display = 'none';
+            document.getElementById('learningContent').style.display = 'block';
+            
+            // Render vocabulary
+            renderVocabulary();
+            
+            // Render dialogue
+            renderDialogue();
+        }
+
+        // Render vocabulary for current unit
+        function renderVocabulary() {
+            const vocabularyGrid = document.getElementById('vocabularyGrid');
+            vocabularyGrid.innerHTML = '';
+            
+            const unitVocabulary = vocabulary[state.activeUnit] || [];
+            const unit = units.find(u => u.id === state.activeUnit);
+            
+            unitVocabulary.forEach(item => {
+                const vocabItem = document.createElement('div');
+                vocabItem.className = 'vocabulary-item';
+                vocabItem.style.background = `linear-gradient(to right, ${getColorClasses(unit.color.replace('500', '50'))})`;
+                
+                // Add subtle background icon based on unit
+                vocabItem.style.backgroundImage = `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="${getColorValue(unit.color.split(' ')[0])}" opacity="0.1"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>')`;
+                vocabItem.style.backgroundSize = '60px';
+                vocabItem.style.backgroundPosition = 'right bottom';
+                vocabItem.style.backgroundRepeat = 'no-repeat';
+                
+                vocabItem.innerHTML = `
+                    <div class="vocab-header">
+                        <span class="vocab-french">${item.french}</span>
+                        <i class="fas fa-volume-up vocab-audio" onclick="playAudio('${item.french}')"></i>
+                    </div>
+                    <p class="vocab-english">${item.english}</p>
+                    <p class="vocab-example">"${item.example}"</p>
+                `;
+                
+                vocabularyGrid.appendChild(vocabItem);
+            });
+        }
+
+        // Render dialogue for current unit
+        function renderDialogue() {
+            const dialogueContent = document.getElementById('dialogueContent');
+            dialogueContent.innerHTML = '';
+            
+            const unitDialogue = dialogues[state.activeUnit] || [];
+            
+            unitDialogue.forEach(line => {
+                const dialogueLine = document.createElement('div');
+                dialogueLine.className = 'dialogue-line';
+                
+                dialogueLine.innerHTML = `
+                    <div class="speaker-icon ${line.speaker === 'A' ? 'speaker-a' : 'speaker-b'}">${line.speaker}</div>
+                    <div class="dialogue-bubble">
+                        <p class="dialogue-french">${line.french}</p>
+                        <p class="dialogue-english">${line.english}</p>
+                    </div>
+                `;
+                
+                dialogueContent.appendChild(dialogueLine);
+            });
+        }
+
+        // Start exercises
+        function startExercises() {
+            state.activeSection = 'exercises';
+            state.currentExercise = 0;
+            state.matchedPairs = [];
+            state.fillInAnswers = {};
+            
+            // Hide learning content, show exercise content
+            document.getElementById('learningContent').style.display = 'none';
+            document.getElementById('exerciseContent').style.display = 'block';
+            document.getElementById('completionScreen').style.display = 'none';
+            
+            // Render the first exercise
+            renderExercise();
+        }
+
+        // Render current exercise
+        function renderExercise() {
+            const exerciseContainer = document.getElementById('exerciseContainer');
+            const exerciseList = exercises[state.activeUnit];
+            
+            // Check if we've completed all exercises
+            if (!exerciseList || state.currentExercise >= exerciseList.length) {
+                showCompletionScreen();
+                return;
+            }
+            
+            const exercise = exerciseList[state.currentExercise];
+            
+            // Update progress
+            updateProgress();
+            
+            // Render based on exercise type
+            switch (exercise.type) {
+                case 'multiple-choice':
+                    renderMultipleChoice(exercise, exerciseContainer);
+                    break;
+                case 'matching':
+                    renderMatching(exercise, exerciseContainer);
+                    break;
+                case 'fill-in':
+                    renderFillIn(exercise, exerciseContainer);
+                    break;
+                case 'typing':
+                    renderTyping(exercise, exerciseContainer);
+                    break;
+                case 'audio-quiz':
+                    renderAudioQuiz(exercise, exerciseContainer);
+                    break;
+            }
+        }
+
+        // Render multiple choice exercise
+        function renderMultipleChoice(exercise, container) {
+            container.innerHTML = `
+                <div class="exercise-question">
+                    <h4>${exercise.question}</h4>
+                    <div class="exercise-points">
+                        <i class="fas fa-star"></i>
+                        <span>${exercise.points} points</span>
+                    </div>
+                </div>
+                <div class="options-grid" id="optionsGrid">
+                    ${exercise.options.map((option, i) => `
+                        <button class="option-button" data-answer="${option}">
+                            <span>${option}</span>
+                            ${state.showFeedback ? 
+                                (option === exercise.correct ? '<i class="fas fa-check"></i>' : 
+                                (option === state.selectedAnswer && option !== exercise.correct ? '<i class="fas fa-times"></i>' : '')) : ''}
+                        </button>
+                    `).join('')}
+                </div>
+            `;
+            
+            // Add event listeners to options
+            const optionButtons = container.querySelectorAll('.option-button');
+            optionButtons.forEach(button => {
+                if (!state.showFeedback) {
+                    button.addEventListener('click', () => checkAnswer(exercise, button.dataset.answer));
+                } else {
+                    button.classList.add('disabled');
+                    if (button.dataset.answer === exercise.correct) {
+                        button.classList.add('correct');
+                    } else if (button.dataset.answer === state.selectedAnswer && button.dataset.answer !== exercise.correct) {
+                        button.classList.add('incorrect');
+                    }
+                }
+            });
+        }
+
+        // Render matching exercise
+        function renderMatching(exercise, container) {
+            const unmatched = exercise.pairs.filter(pair => 
+                !state.matchedPairs.some(m => m.french === pair.french || m.english === pair.english)
+            );
+            
+            container.innerHTML = `
+                <div class="exercise-question">
+                    <h4>${exercise.question}</h4>
+                    <p class="exercise-points">Drag and drop to match!</p>
+                </div>
+                <div class="matching-container">
+                    <div class="matching-column">
+                        <h5>Français 🇫🇷</h5>
+                        ${unmatched.map((pair, i) => `
+                            <div class="matching-item french-item" draggable="true" data-item="${pair.french}" data-type="french">
+                                <i class="fas fa-grip-lines"></i>
+                                ${pair.french}
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="matching-column">
+                        <h5>English 🇬🇧</h5>
+                        ${unmatched.map((pair, i) => `
+                            <div class="matching-item english-item" draggable="true" data-item="${pair.english}" data-type="english">
+                                <i class="fas fa-grip-lines"></i>
+                                ${pair.english}
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                ${state.matchedPairs.length > 0 ? `
+                    <div class="matched-pairs">
+                        <h5>Matched Pairs ✓</h5>
+                        ${state.matchedPairs.map((pair, i) => `
+                            <div class="pair-item">
+                                <span class="pair-french">${pair.french}</span>
+                                <span class="pair-arrow">→</span>
+                                <span class="pair-english">${pair.english}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                ` : ''}
+                ${state.matchedPairs.length === exercise.pairs.length ? `
+                    <button id="checkMatching" class="submit-button">Check Answers</button>
+                ` : ''}
+            `;
+            
+            // Add drag and drop event listeners
+            const matchingItems = container.querySelectorAll('.matching-item');
+            matchingItems.forEach(item => {
+                item.addEventListener('dragstart', handleDragStart);
+                item.addEventListener('dragover', handleDragOver);
+                item.addEventListener('drop', handleDrop);
+            });
+            
+            // Add event listener to check matching button
+            if (state.matchedPairs.length === exercise.pairs.length) {
+                document.getElementById('checkMatching').addEventListener('click', () => checkMatching(exercise));
+            }
+        }
+
+        // Render fill-in exercise
+        function renderFillIn(exercise, container) {
+            container.innerHTML = `
+                <div class="exercise-question">
+                    <h4>${exercise.question}</h4>
+                </div>
+                <div class="fill-in-container">
+                    ${exercise.template.split('\\n').map((line, lineIdx) => `
+                        <div class="fill-in-line">
+                            ${line.split('___').map((part, i) => `
+                                ${part}
+                                ${i < exercise.blanks.length ? `
+                                    <input type="text" class="fill-in-input" data-index="${lineIdx * 10 + i}" 
+                                           value="${state.fillInAnswers[lineIdx * 10 + i] || ''}" 
+                                           placeholder="...">
+                                ` : ''}
+                            `).join('')}
+                        </div>
+                    `).join('')}
+                </div>
+                <button id="submitFillIn" class="submit-button" ${Object.keys(state.fillInAnswers).length < exercise.blanks.length ? 'disabled' : ''}>
+                    Submit Answer
+                </button>
+            `;
+            
+            // Add event listeners to inputs
+            const inputs = container.querySelectorAll('.fill-in-input');
+            inputs.forEach(input => {
+                input.addEventListener('input', (e) => {
+                    state.fillInAnswers[e.target.dataset.index] = e.target.value;
+                    document.getElementById('submitFillIn').disabled = 
+                        Object.keys(state.fillInAnswers).length < exercise.blanks.length;
+                });
+            });
+            
+            // Add event listener to submit button
+            document.getElementById('submitFillIn').addEventListener('click', () => {
+                const userAnswers = Object.values(state.fillInAnswers);
+                const allCorrect = exercise.blanks.every((blank, i) => 
+                    userAnswers[i]?.toLowerCase().trim() === blank.toLowerCase().trim()
+                );
+                checkAnswer(exercise, allCorrect);
+            });
+        }
+
+        // Render typing exercise
+        function renderTyping(exercise, container) {
+            container.innerHTML = `
+                <div class="exercise-question">
+                    <h4>${exercise.question}</h4>
+                </div>
+                <div class="typing-container">
+                    <textarea id="typingInput" placeholder="Type your answer here...">${state.userInput}</textarea>
+                </div>
+                <button id="submitTyping" class="submit-button" ${!state.userInput.trim() ? 'disabled' : ''}>
+                    Submit Answer
+                </button>
+            `;
+            
+            // Add event listener to textarea
+            document.getElementById('typingInput').addEventListener('input', (e) => {
+                state.userInput = e.target.value;
+                document.getElementById('submitTyping').disabled = !state.userInput.trim();
+            });
+            
+            // Add event listener to submit button
+            document.getElementById('submitTyping').addEventListener('click', () => {
+                checkAnswer(exercise, state.userInput.trim());
+            });
+        }
+
+        // Render audio quiz exercise
+        function renderAudioQuiz(exercise, container) {
+            container.innerHTML = `
+                <div class="audio-container">
+                    <h4>${exercise.question}</h4>
+                    <div class="audio-button" onclick="playAudio('${exercise.audioText}')">
+                        <i class="fas fa-volume-up"></i>
+                        <span>Play Audio</span>
+                    </div>
+                    <p class="audio-text">"${exercise.audioText}"</p>
+                </div>
+                <div class="options-grid" id="optionsGrid">
+                    ${exercise.options.map((option, i) => `
+                        <button class="option-button" data-answer="${option}">
+                            <span>${option}</span>
+                            ${state.showFeedback ? 
+                                (option === exercise.correct ? '<i class="fas fa-check"></i>' : 
+                                (option === state.selectedAnswer && option !== exercise.correct ? '<i class="fas fa-times"></i>' : '')) : ''}
+                        </button>
+                    `).join('')}
+                </div>
+            `;
+            
+            // Add event listeners to options
+            const optionButtons = container.querySelectorAll('.option-button');
+            optionButtons.forEach(button => {
+                if (!state.showFeedback) {
+                    button.addEventListener('click', () => checkAnswer(exercise, button.dataset.answer));
+                } else {
+                    button.classList.add('disabled');
+                    if (button.dataset.answer === exercise.correct) {
+                        button.classList.add('correct');
+                    } else if (button.dataset.answer === state.selectedAnswer && button.dataset.answer !== exercise.correct) {
+                        button.classList.add('incorrect');
+                    }
+                }
+            });
+        }
+
+        // Check answer for an exercise
+        function checkAnswer(exercise, answer) {
+            const isCorrect = exercise.correct === answer || 
+                             (Array.isArray(exercise.correct) && exercise.correct.includes(answer));
+            
+            state.selectedAnswer = answer;
+            state.showFeedback = true;
+            
+            if (isCorrect) {
+                state.score += exercise.points;
+                state.streak += 1;
+                if (state.streak >= 2) {
+                    triggerCelebration();
+                }
+            } else {
+                state.streak = 0;
+            }
+            
+            updateScoreDisplay();
+            
+            setTimeout(() => {
+                if (state.currentExercise < exercises[state.activeUnit].length - 1) {
+                    state.currentExercise += 1;
+                    state.selectedAnswer = null;
+                    state.showFeedback = false;
+                    state.userInput = '';
+                    state.fillInAnswers = {};
+                    renderExercise();
+                } else {
+                    state.completedExercises.push(state.activeUnit);
+                    showCompletionScreen();
+                }
+            }, 2000);
+        }
+
+        // Check matching exercise
+        function checkMatching(exercise) {
+            const allCorrect = exercise.pairs.every(pair => 
+                state.matchedPairs.some(matched => 
+                    matched.french === pair.french && matched.english === pair.english
+                )
+            );
+            
+            if (allCorrect && state.matchedPairs.length === exercise.pairs.length) {
+                state.score += exercise.points;
+                state.streak += 1;
+                triggerCelebration();
+                
+                setTimeout(() => {
+                    if (state.currentExercise < exercises[state.activeUnit].length - 1) {
+                        state.currentExercise += 1;
+                        state.matchedPairs = [];
+                        renderExercise();
+                    } else {
+                        state.completedExercises.push(state.activeUnit);
+                        showCompletionScreen();
+                    }
+                }, 2000);
+            }
+            
+            updateScoreDisplay();
+        }
+
+        // Show completion screen
+        function showCompletionScreen() {
+            document.getElementById('exerciseContent').style.display = 'none';
+            document.getElementById('completionScreen').style.display = 'block';
+        }
+
+        // Update progress display
+        function updateProgress() {
+            const exerciseList = exercises[state.activeUnit];
+            const progress = ((state.currentExercise + 1) / exerciseList.length) * 100;
+            
+            document.getElementById('progressLabel').textContent = 
+                `Question ${state.currentExercise + 1} of ${exerciseList.length}`;
+            document.getElementById('progressPercent').textContent = `${Math.round(progress)}%`;
+            document.getElementById('progressFill').style.width = `${progress}%`;
+        }
+
+        // Update score and streak display
+        function updateScoreDisplay() {
+            document.getElementById('scoreValue').textContent = `${state.score} pts`;
+            
+            if (state.streak > 0) {
+                document.getElementById('streakBadge').style.display = 'flex';
+                document.getElementById('streakCount').textContent = `${state.streak} Streak!`;
+            } else {
+                document.getElementById('streakBadge').style.display = 'none';
+            }
+        }
+
+        // Trigger celebration animation
+        function triggerCelebration() {
+            state.celebrationMode = true;
+            document.getElementById('celebration').style.display = 'flex';
+            
+            setTimeout(() => {
+                state.celebrationMode = false;
+                document.getElementById('celebration').style.display = 'none';
+            }, 2000);
+        }
+
+        // Drag and drop handlers
+        function handleDragStart(e) {
+            state.draggedItem = {
+                item: e.target.dataset.item,
+                type: e.target.dataset.type
+            };
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            if (state.draggedItem && e.target.dataset.type !== state.draggedItem.type) {
+                const newPair = e.target.dataset.type === 'french' 
+                    ? { french: e.target.dataset.item, english: state.draggedItem.item }
+                    : { french: state.draggedItem.item, english: e.target.dataset.item };
+                
+                state.matchedPairs.push(newPair);
+                state.draggedItem = null;
+                
+                // Re-render the exercise to show updated matches
+                renderExercise();
+            }
+        }
+
+        // Navigation functions
+        function backToUnits() {
+            state.activeUnit = null;
+            state.activeSection = null;
+            state.currentExercise = 0;
+            
+            document.getElementById('welcomeScreen').style.display = 'block';
+            document.getElementById('unitDetailScreen').style.display = 'none';
+            
+            // Re-render units to show completion status
+            renderUnits();
+        }
+
+        function backToLessons() {
+            state.activeSection = null;
+            state.currentExercise = 0;
+            
+            document.getElementById('exerciseContent').style.display = 'none';
+            document.getElementById('completionScreen').style.display = 'none';
+            document.getElementById('unitActions').style.display = 'grid';
+        }
+
+        // Utility functions
+        function getColorClasses(colorString) {
+            // Convert Tailwind-like color classes to actual CSS colors
+            const colorMap = {
+                'blue-500': '#3b82f6',
+                'cyan-500': '#06b6d4',
+                'purple-500': '#a855f7',
+                'pink-500': '#ec4899',
+                'green-500': '#10b981',
+                'emerald-500': '#059669',
+                'orange-500': '#f97316',
+                'red-500': '#ef4444',
+                'yellow-500': '#eab308',
+                'amber-500': '#f59e0b',
+                'blue-50': '#eff6ff',
+                'cyan-50': '#ecfeff',
+                'purple-50': '#faf5ff',
+                'pink-50': '#fdf2f8',
+                'green-50': '#f0fdf4',
+                'emerald-50': '#ecfdf5',
+                'orange-50': '#fff7ed',
+                'red-50': '#fef2f2',
+                'yellow-50': '#fefce8',
+                'amber-50': '#fffbeb'
+            };
+            
+            const colors = colorString.split(' ');
+            return colors.map(color => colorMap[color] || color).join(', ');
+        }
+
+        function getColorValue(colorClass) {
+            const colorMap = {
+                'blue-500': '#3b82f6',
+                'cyan-500': '#06b6d4',
+                'purple-500': '#a855f7',
+                'pink-500': '#ec4899',
+                'green-500': '#10b981',
+                'emerald-500': '#059669',
+                'orange-500': '#f97316',
+                'red-500': '#ef4444',
+                'yellow-500': '#eab308',
+                'amber-500': '#f59e0b'
+            };
+            
+            return colorMap[colorClass] || '#3b82f6';
+        }
+
+        // Audio playback function
+        function playAudio(text) {
+            // In a real implementation, this would use the Web Speech API
+            // or play pre-recorded audio files
+            alert(`Playing audio: "${text}"`);
+        }
+    </script>
+</body>
+</html>
