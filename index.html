@@ -138,6 +138,43 @@
             color: #92400e;
         }
 
+        /* Audio Player Styles */
+        .audio-player {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 0.5rem 0;
+        }
+
+        .play-button {
+            background: var(--primary-purple);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .play-button:hover {
+            background: var(--primary-pink);
+            transform: scale(1.1);
+        }
+
+        .play-button.playing {
+            background: var(--primary-pink);
+        }
+
+        .audio-text {
+            flex: 1;
+            font-style: italic;
+            color: #6b7280;
+        }
+
         /* Main Content Styles */
         main {
             max-width: 1200px;
@@ -656,6 +693,7 @@
             cursor: pointer;
             transition: all 0.3s;
             margin-bottom: 0.75rem;
+            border: none;
         }
 
         .audio-button:hover {
@@ -1182,7 +1220,9 @@
             draggedItem: null,
             matchedPairs: [],
             userInput: '',
-            fillInAnswers: {}
+            fillInAnswers: {},
+            speechSynthesis: window.speechSynthesis,
+            currentUtterance: null
         };
 
         // Exercises data
@@ -1449,6 +1489,11 @@
             renderUnits();
             setupEventListeners();
             updateScoreDisplay();
+            
+            // Check if speech synthesis is supported
+            if (!state.speechSynthesis) {
+                console.warn('Speech synthesis not supported in this browser');
+            }
         });
 
         // Render the units grid
@@ -1555,10 +1600,17 @@
                 vocabItem.innerHTML = `
                     <div class="vocab-header">
                         <span class="vocab-french">${item.french}</span>
-                        <i class="fas fa-volume-up vocab-audio" onclick="playAudio('${item.french}')"></i>
+                        <button class="play-button" onclick="playFrenchText('${item.french}')">
+                            <i class="fas fa-volume-up"></i>
+                        </button>
                     </div>
                     <p class="vocab-english">${item.english}</p>
-                    <p class="vocab-example">"${item.example}"</p>
+                    <div class="audio-player">
+                        <button class="play-button" onclick="playFrenchText('${item.example}')">
+                            <i class="fas fa-volume-up"></i>
+                        </button>
+                        <span class="audio-text">"${item.example}"</span>
+                    </div>
                 `;
                 
                 vocabularyGrid.appendChild(vocabItem);
@@ -1579,7 +1631,12 @@
                 dialogueLine.innerHTML = `
                     <div class="speaker-icon ${line.speaker === 'A' ? 'speaker-a' : 'speaker-b'}">${line.speaker}</div>
                     <div class="dialogue-bubble">
-                        <p class="dialogue-french">${line.french}</p>
+                        <div class="audio-player">
+                            <button class="play-button" onclick="playFrenchText('${line.french}')">
+                                <i class="fas fa-volume-up"></i>
+                            </button>
+                            <span class="audio-text dialogue-french">${line.french}</span>
+                        </div>
                         <p class="dialogue-english">${line.english}</p>
                     </div>
                 `;
@@ -1816,11 +1873,13 @@
             container.innerHTML = `
                 <div class="audio-container">
                     <h4>${exercise.question}</h4>
-                    <div class="audio-button" onclick="playAudio('${exercise.audioText}')">
-                        <i class="fas fa-volume-up"></i>
-                        <span>Play Audio</span>
+                    <div class="audio-player">
+                        <button class="audio-button" onclick="playFrenchText('${exercise.audioText}')">
+                            <i class="fas fa-volume-up"></i>
+                            <span>Play Audio</span>
+                        </button>
+                        <span class="audio-text">"${exercise.audioText}"</span>
                     </div>
-                    <p class="audio-text">"${exercise.audioText}"</p>
                 </div>
                 <div class="options-grid" id="optionsGrid">
                     ${exercise.options.map((option, i) => `
@@ -2002,6 +2061,57 @@
             document.getElementById('unitActions').style.display = 'grid';
         }
 
+        // Text-to-speech function
+        function playFrenchText(text) {
+            // Stop any currently playing speech
+            if (state.currentUtterance) {
+                state.speechSynthesis.cancel();
+            }
+            
+            // Create a new utterance
+            const utterance = new SpeechSynthesisUtterance(text);
+            
+            // Set French language and voice properties
+            utterance.lang = 'fr-FR';
+            utterance.rate = 0.9; // Slightly slower for language learning
+            utterance.pitch = 1;
+            utterance.volume = 1;
+            
+            // Try to find a French voice
+            const voices = state.speechSynthesis.getVoices();
+            const frenchVoice = voices.find(voice => 
+                voice.lang.startsWith('fr') || voice.lang.startsWith('fr-FR')
+            );
+            
+            if (frenchVoice) {
+                utterance.voice = frenchVoice;
+            }
+            
+            // Store the current utterance
+            state.currentUtterance = utterance;
+            
+            // Speak the text
+            state.speechSynthesis.speak(utterance);
+            
+            // Update button state
+            const button = event.target.closest('.play-button') || event.target.closest('.audio-button');
+            if (button) {
+                button.classList.add('playing');
+                button.querySelector('i').className = 'fas fa-volume-up';
+                
+                // Reset button when speech ends
+                utterance.onend = function() {
+                    button.classList.remove('playing');
+                };
+                
+                utterance.onerror = function() {
+                    button.classList.remove('playing');
+                    // Fallback: show the text in an alert if speech fails
+                    alert(`Pronunciation: ${text}`);
+                };
+            }
+        }
+
         // Utility functions
         function getColorClasses(colorString) {
             // Convert Tailwind-like color classes to actual CSS colors
@@ -2047,13 +2157,6 @@
             };
             
             return colorMap[colorClass] || '#3b82f6';
-        }
-
-        // Audio playback function
-        function playAudio(text) {
-            // In a real implementation, this would use the Web Speech API
-            // or play pre-recorded audio files
-            alert(`Playing audio: "${text}"`);
         }
     </script>
 </body>
